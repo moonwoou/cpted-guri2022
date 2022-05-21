@@ -1,0 +1,22 @@
+body {
+	color: #ccc;
+	background-color: #333;
+}
+img.sisul {
+	transform: rotate(90deg);
+	filter: drop-shadow(5px 5px 5px #000);
+	margin-top: 130px;
+}
+h1 {
+	padding: 5px;
+}
+p.txt-right {
+	text-align: right;
+	padding: 5px;
+}
+hr {
+	border: 0;
+	height: 0;
+	border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+	border-bottom: 0.5px solid rgba(255, 255, 255, 0.3);
+}
