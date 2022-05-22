@@ -4,9 +4,10 @@ body {
 }
 
 img.sisul {
-	transform: rotate(90deg);
+	/* PDF 생성시 아래 한 줄 주석 해제 */
+	/* transform: rotate(90deg); margin-top: 130px; */
+	padding-top: 20px;
 	filter: drop-shadow(4px 4px 4px rgb(188, 188, 188));
-	margin-top: 130px;
 }
 
 h1 {
