@@ -516,7 +516,7 @@ for (let ci = 0; ci < category.length; ci++) {
 		article_content += `	</div>`;
 		article_content += `	<div class="w3-half" style="width: 466px;">`;
 		article_content += `		<div class="w3-container w3-card w3-white w3-margin-bottom" style="height: 600px; margin-left: 20px;">`;
-		article_content += `			<img src="./images/` + element[0] + `/` + element[1] + `.jpg" class="sisul" />`;
+		article_content += `			<img src="./images/` + element[0] + `/PSD/` + element[1] + `.jpg" class="sisul" />`;
 		article_content += `		</div>`;
 		article_content += `	</div>`;
 		article_content += `</div>`;
