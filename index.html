@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>위치 참고</title>
+	<style>
+		#mapwrap {
+			position: relative;
+			overflow: hidden;
+		}
+
+		.popup {
+			width: 200px;
+			height: 30px;
+			margin-top: 10px;
+			text-align: center;
+			;
+		}
+
+		img.imgPopup {
+			width: 200px;
+			height: auto;
+			padding-top: 50px;
+		}
+
+		.category,
+		.category * {
+			margin: 0;
+			padding: 0;
+			color: #000;
+		}
+
+		.category {
+			position: absolute;
+			overflow: hidden;
+			top: 10px;
+			left: 10px;
+			width: 350px;
+			height: 100px;
+			z-index: 10;
+			border: 1px solid black;
+			font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+			font-size: 12px;
+			text-align: center;
+			background-color: #fff;
+		}
+
+		.category .menu_selected {
+			background: #FF5F4A;
+			color: #fff;
+			border-left: 1px solid #915B2F;
+			border-right: 1px solid #915B2F;
+			margin: 0 -1px;
+		}
+
+		.category li {
+			list-style: none;
+			float: left;
+			width: 50px;
+			height: 45px;
+			padding-top: 5px;
+			cursor: pointer;
+		}
+
+		.category .ico_comm {
+			display: block;
+			margin: 0 auto 2px;
+			width: 20px;
+			height: 20px;
+			background: url('./map-icon3.png') no-repeat;
+		}
+
+		.category .ico_01 {
+			background-position: 0 0;
+		}
+
+		.category .ico_02 {
+			background-position: -20px 0;
+		}
+
+		.category .ico_03 {
+			background-position: -40px 0;
+		}
+
+		.category .ico_04 {
+			background-position: -60px 0;
+		}
+
+		.category .ico_05 {
+			background-position: -80px 0;
+		}
+
+		.category .ico_06 {
+			background-position: -100px 0;
+		}
+
+		.category .ico_07 {
+			background-position: -120px 0;
+		}
+
+		.category .ico_08 {
+			background-position: -140px 0;
+		}
+
+		.category .ico_09 {
+			background-position: -160px 0;
+		}
+
+		.category .ico_10 {
+			background-position: -180px 0;
+		}
+
+		.category .ico_11 {
+			background-position: -200px 0;
+		}
+
+		.category .ico_12 {
+			background-position: -220px 0;
+		}
+
+		.category .ico_13 {
+			background-position: -240px 0;
+		}
+
+		.category .ico_14 {
+			background-position: -260px 0;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="mapwrap">
+		<!-- 지도가 표시될 div -->
+		<div id="map" style="width:100%;height:1080px;"></div>
+		<!-- 지도 위에 표시될 마커 카테고리 -->
+		<div class="category">
+			<ul>
+				<li id="markerMenu01" onclick="changeMarker(01-1)">
+					<span class="ico_comm ico_01"></span>
+					가로등
+				</li>
+				<li id="markerMenu02" onclick="changeMarker(02-1)">
+					<span class="ico_comm ico_02"></span>
+					보안등
+				</li>
+				<li id="markerMenu03" onclick="changeMarker(03-1)">
+					<span class="ico_comm ico_03"></span>
+					공원등
+				</li>
+				<li id="markerMenu04" onclick="changeMarker(04-1)">
+					<span class="ico_comm ico_04"></span>
+					주차등
+				</li>
+				<li id="markerMenu05" onclick="changeMarker(05-1)">
+					<span class="ico_comm ico_05"></span>
+					아파트등
+				</li>
+				<li id="markerMenu06" onclick="changeMarker(06-1)">
+					<span class="ico_comm ico_06"></span>
+					고보조명
+				</li>
+				<li id="markerMenu07" onclick="changeMarker(07-1)">
+					<span class="ico_comm ico_07"></span>
+					전신주
+				</li>
+				<li id="markerMenu08" onclick="changeMarker(08-1)">
+					<span class="ico_comm ico_08"></span>
+					통신주
+				</li>
+				<li id="markerMenu09" onclick="changeMarker(09-1)">
+					<span class="ico_comm ico_09"></span>
+					CCTV
+				</li>
+				<li id="markerMenu10" onclick="changeMarker(10-1)">
+					<span class="ico_comm ico_10"></span>
+					반사경
+				</li>
+				<li id="markerMenu11" onclick="changeMarker(11-1)">
+					<span class="ico_comm ico_11"></span>
+					신호등
+				</li>
+				<li id="markerMenu12" onclick="changeMarker(12-1)">
+					<span class="ico_comm ico_12"></span>
+					쓰레기무단투기
+				</li>
+				<li id="markerMenu13" onclick="changeMarker(13-1)">
+					<span class="ico_comm ico_13"></span>
+					의류수거함
+				</li>
+				<li id="markerMenu14" onclick="changeMarker(14-1)">
+					<span class="ico_comm ico_14"></span>
+					교통표지판
+				</li>
+
+			</ul>
+		</div>
+	</div>
+
+	<script type="text/javascript"
+		src="//dapi.kakao.com/v2/maps/sdk.js?appkey=a41d5950dc9a3d791ad234f2c795a199&libraries=services"></script>
+	<script>
+		var mapContainer = document.getElementById('map'), // 지도를 표시할 div  
+			mapOption = {
+				center: new kakao.maps.LatLng(37.59952, 127.14404), // 지도의 중심좌표 
+				level: 3 // 지도의 확대 레벨 
+			};
+
+		var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+
+		// 주소-좌표 변환 객체를 생성합니다
+		var geocoder = new kakao.maps.services.Geocoder();
+
+		function makeDiv(folder, file) {
+			return '<div class="popup">' + file + '<img class="imgPopup" src="./images/' + folder + '/' + file + '.jpeg"></div>'
+		}
+		var markerPositions = [
+			[ // 가로등
+				{ latlng: new kakao.maps.LatLng(37.5982944444444, 127.143050000000), content: makeDiv('가로등(10)', '가로등033') },
+				{ latlng: new kakao.maps.LatLng(37.5980000000000, 127.143294444444), content: makeDiv('가로등(10)', '가로등037') },
+				{ latlng: new kakao.maps.LatLng(37.5991472222222, 127.142477777778), content: makeDiv('가로등(10)', '가로등133') },
+				{ latlng: new kakao.maps.LatLng(37.5997583333333, 127.142175000000), content: makeDiv('가로등(10)', '가로등134') },
+				{ latlng: new kakao.maps.LatLng(37.6000972222222, 127.141983333333), content: makeDiv('가로등(10)', '가로등135') },
+				{ latlng: new kakao.maps.LatLng(37.6003027777778, 127.141602777778), content: makeDiv('가로등(10)', '가로등136') },
+				{ latlng: new kakao.maps.LatLng(37.6010027777778, 127.141572222222), content: makeDiv('가로등(10)', '가로등236') },
+				{ latlng: new kakao.maps.LatLng(37.6012083333333, 127.141944444444), content: makeDiv('가로등(10)', '가로등240') },
+				{ latlng: new kakao.maps.LatLng(37.6015277777778, 127.142563888889), content: makeDiv('가로등(10)', '가로등246') },
+				{ latlng: new kakao.maps.LatLng(37.5989388888889, 127.142677777778), content: makeDiv('가로등(10)', '가로등x01') },
+			], [ // 보안등
+				{ latlng: new kakao.maps.LatLng(37.5987444444444, 127.145377777778), content: makeDiv('보안등(111)', '보안등566') },
+				{ latlng: new kakao.maps.LatLng(37.5986583333333, 127.145302777778), content: makeDiv('보안등(111)', '보안등567') },
+				{ latlng: new kakao.maps.LatLng(37.5981166666667, 127.143713888889), content: makeDiv('보안등(111)', '보안등568') },
+				{ latlng: new kakao.maps.LatLng(37.5982555555556, 127.143508333333), content: makeDiv('보안등(111)', '보안등569') },
+				{ latlng: new kakao.maps.LatLng(37.5986944444444, 127.143775000000), content: makeDiv('보안등(111)', '보안등570') },
+				{ latlng: new kakao.maps.LatLng(37.5989416666667, 127.143761111111), content: makeDiv('보안등(111)', '보안등571') },
+				{ latlng: new kakao.maps.LatLng(37.5991888888889, 127.144050000000), content: makeDiv('보안등(111)', '보안등572') },
+				{ latlng: new kakao.maps.LatLng(37.5991277777778, 127.144219444444), content: makeDiv('보안등(111)', '보안등573') },
+				{ latlng: new kakao.maps.LatLng(37.5991472222222, 127.144102777778), content: makeDiv('보안등(111)', '보안등574') },
+				{ latlng: new kakao.maps.LatLng(37.5991444444444, 127.144858333333), content: makeDiv('보안등(111)', '보안등575') },
+				{ latlng: new kakao.maps.LatLng(37.5988916666667, 127.144775000000), content: makeDiv('보안등(111)', '보안등576') },
+				{ latlng: new kakao.maps.LatLng(37.5988305555556, 127.144797222222), content: makeDiv('보안등(111)', '보안등577') },
+				{ latlng: new kakao.maps.LatLng(37.5985750000000, 127.144913888889), content: makeDiv('보안등(111)', '보안등578') },
+				{ latlng: new kakao.maps.LatLng(37.5981722222222, 127.144005555556), content: makeDiv('보안등(111)', '보안등579') },
+				{ latlng: new kakao.maps.LatLng(37.5988472222222, 127.143905555556), content: makeDiv('보안등(111)', '보안등580') },
+				{ latlng: new kakao.maps.LatLng(37.5989222222222, 127.143547222222), content: makeDiv('보안등(111)', '보안등581') },
+				{ latlng: new kakao.maps.LatLng(37.5984916666667, 127.143258333333), content: makeDiv('보안등(111)', '보안등582') },
+				{ latlng: new kakao.maps.LatLng(37.5993694444444, 127.143219444444), content: makeDiv('보안등(111)', '보안등584') },
+				{ latlng: new kakao.maps.LatLng(37.5992472222222, 127.143555555556), content: makeDiv('보안등(111)', '보안등585') },
+				{ latlng: new kakao.maps.LatLng(37.5998416666667, 127.143652777778), content: makeDiv('보안등(111)', '보안등586') },
+				{ latlng: new kakao.maps.LatLng(37.5999333333333, 127.143691666667), content: makeDiv('보안등(111)', '보안등587') },
+				{ latlng: new kakao.maps.LatLng(37.6000777777778, 127.143822222222), content: makeDiv('보안등(111)', '보안등588') },
+				{ latlng: new kakao.maps.LatLng(37.6003750000000, 127.144019444444), content: makeDiv('보안등(111)', '보안등589') },
+				{ latlng: new kakao.maps.LatLng(37.6005972222222, 127.144316666667), content: makeDiv('보안등(111)', '보안등590') },
+				{ latlng: new kakao.maps.LatLng(37.6008000000000, 127.144455555556), content: makeDiv('보안등(111)', '보안등592') },
+				{ latlng: new kakao.maps.LatLng(37.6010777777778, 127.144538888889), content: makeDiv('보안등(111)', '보안등593') },
+				{ latlng: new kakao.maps.LatLng(37.6008250000000, 127.144766666667), content: makeDiv('보안등(111)', '보안등594') },
+				{ latlng: new kakao.maps.LatLng(37.6004722222222, 127.144630555556), content: makeDiv('보안등(111)', '보안등595') },
+				{ latlng: new kakao.maps.LatLng(37.6003305555556, 127.144302777778), content: makeDiv('보안등(111)', '보안등596') },
+				{ latlng: new kakao.maps.LatLng(37.5997611111111, 127.143905555556), content: makeDiv('보안등(111)', '보안등597') },
+				{ latlng: new kakao.maps.LatLng(37.5994916666667, 127.143769444444), content: makeDiv('보안등(111)', '보안등598') },
+				{ latlng: new kakao.maps.LatLng(37.5994027777778, 127.143875000000), content: makeDiv('보안등(111)', '보안등599') },
+				{ latlng: new kakao.maps.LatLng(37.5995666666667, 127.144172222222), content: makeDiv('보안등(111)', '보안등600') },
+				{ latlng: new kakao.maps.LatLng(37.5999250000000, 127.144363888889), content: makeDiv('보안등(111)', '보안등601') },
+				{ latlng: new kakao.maps.LatLng(37.6000777777778, 127.144538888889), content: makeDiv('보안등(111)', '보안등602') },
+				{ latlng: new kakao.maps.LatLng(37.6005666666667, 127.144958333333), content: makeDiv('보안등(111)', '보안등603') },
+				{ latlng: new kakao.maps.LatLng(37.6003638888889, 127.144822222222), content: makeDiv('보안등(111)', '보안등604') },
+				{ latlng: new kakao.maps.LatLng(37.5999444444444, 127.144752777778), content: makeDiv('보안등(111)', '보안등605') },
+				{ latlng: new kakao.maps.LatLng(37.6000777777778, 127.144905555556), content: makeDiv('보안등(111)', '보안등606') },
+				{ latlng: new kakao.maps.LatLng(37.6001250000000, 127.144997222222), content: makeDiv('보안등(111)', '보안등607') },
+				{ latlng: new kakao.maps.LatLng(37.6010444444444, 127.144975000000), content: makeDiv('보안등(111)', '보안등608') },
+				{ latlng: new kakao.maps.LatLng(37.6006916666667, 127.145141666667), content: makeDiv('보안등(111)', '보안등609') },
+				{ latlng: new kakao.maps.LatLng(37.5996083333333, 127.144463888889), content: makeDiv('보안등(111)', '보안등611') },
+				{ latlng: new kakao.maps.LatLng(37.5994000000000, 127.144325000000), content: makeDiv('보안등(111)', '보안등612') },
+				{ latlng: new kakao.maps.LatLng(37.5988833333333, 127.144041666667), content: makeDiv('보안등(111)', '보안등613') },
+				{ latlng: new kakao.maps.LatLng(37.5989194444444, 127.144058333333), content: makeDiv('보안등(111)', '보안등614') },
+				{ latlng: new kakao.maps.LatLng(37.5992361111111, 127.144691666667), content: makeDiv('보안등(111)', '보안등615') },
+				{ latlng: new kakao.maps.LatLng(37.5995361111111, 127.144883333333), content: makeDiv('보안등(111)', '보안등616') },
+				{ latlng: new kakao.maps.LatLng(37.5996194444444, 127.144958333333), content: makeDiv('보안등(111)', '보안등617') },
+				{ latlng: new kakao.maps.LatLng(37.5998472222222, 127.145119444444), content: makeDiv('보안등(111)', '보안등618') },
+				{ latlng: new kakao.maps.LatLng(37.5996750000000, 127.145216666667), content: makeDiv('보안등(111)', '보안등619') },
+				{ latlng: new kakao.maps.LatLng(37.5994305555556, 127.145277777778), content: makeDiv('보안등(111)', '보안등620') },
+				{ latlng: new kakao.maps.LatLng(37.5995166666667, 127.145294444444), content: makeDiv('보안등(111)', '보안등621') },
+				{ latlng: new kakao.maps.LatLng(37.5997583333333, 127.145233333333), content: makeDiv('보안등(111)', '보안등622') },
+				{ latlng: new kakao.maps.LatLng(37.5998833333333, 127.145666666667), content: makeDiv('보안등(111)', '보안등623') },
+				{ latlng: new kakao.maps.LatLng(37.5999527777778, 127.145744444444), content: makeDiv('보안등(111)', '보안등624') },
+				{ latlng: new kakao.maps.LatLng(37.6007333333333, 127.145638888889), content: makeDiv('보안등(111)', '보안등626') },
+				{ latlng: new kakao.maps.LatLng(37.6006750000000, 127.145491666667), content: makeDiv('보안등(111)', '보안등627') },
+				{ latlng: new kakao.maps.LatLng(37.6002777777778, 127.145819444444), content: makeDiv('보안등(111)', '보안등628') },
+				{ latlng: new kakao.maps.LatLng(37.5998527777778, 127.146430555556), content: makeDiv('보안등(111)', '보안등629') },
+				{ latlng: new kakao.maps.LatLng(37.5998527777778, 127.146422222222), content: makeDiv('보안등(111)', '보안등630') },
+				{ latlng: new kakao.maps.LatLng(37.5995861111111, 127.146888888889), content: makeDiv('보안등(111)', '보안등631') },
+				{ latlng: new kakao.maps.LatLng(37.5993083333333, 127.145713888889), content: makeDiv('보안등(111)', '보안등632') },
+				{ latlng: new kakao.maps.LatLng(37.5991583333333, 127.145844444444), content: makeDiv('보안등(111)', '보안등633') },
+				{ latlng: new kakao.maps.LatLng(37.5991333333333, 127.145980555556), content: makeDiv('보안등(111)', '보안등634') },
+				{ latlng: new kakao.maps.LatLng(37.5991250000000, 127.146150000000), content: makeDiv('보안등(111)', '보안등635') },
+				{ latlng: new kakao.maps.LatLng(37.5995666666667, 127.142730555556), content: makeDiv('보안등(111)', '보안등636') },
+				{ latlng: new kakao.maps.LatLng(37.5997694444444, 127.143233333333), content: makeDiv('보안등(111)', '보안등637') },
+				{ latlng: new kakao.maps.LatLng(37.5998166666667, 127.143158333333), content: makeDiv('보안등(111)', '보안등638') },
+				{ latlng: new kakao.maps.LatLng(37.6002277777778, 127.143302777778), content: makeDiv('보안등(111)', '보안등639') },
+				{ latlng: new kakao.maps.LatLng(37.6001972222222, 127.143477777778), content: makeDiv('보안등(111)', '보안등640') },
+				{ latlng: new kakao.maps.LatLng(37.6003888888889, 127.143883333333), content: makeDiv('보안등(111)', '보안등641') },
+				{ latlng: new kakao.maps.LatLng(37.6003638888889, 127.143866666667), content: makeDiv('보안등(111)', '보안등642') },
+				{ latlng: new kakao.maps.LatLng(37.6006750000000, 127.143769444444), content: makeDiv('보안등(111)', '보안등643') },
+				{ latlng: new kakao.maps.LatLng(37.6010777777778, 127.144211111111), content: makeDiv('보안등(111)', '보안등644') },
+				{ latlng: new kakao.maps.LatLng(37.6014888888889, 127.143813888889), content: makeDiv('보안등(111)', '보안등645') },
+				{ latlng: new kakao.maps.LatLng(37.6014444444444, 127.143530555556), content: makeDiv('보안등(111)', '보안등646') },
+				{ latlng: new kakao.maps.LatLng(37.6009972222222, 127.143411111111), content: makeDiv('보안등(111)', '보안등647') },
+				{ latlng: new kakao.maps.LatLng(37.6007111111111, 127.143416666667), content: makeDiv('보안등(111)', '보안등648') },
+				{ latlng: new kakao.maps.LatLng(37.6001777777778, 127.142905555556), content: makeDiv('보안등(111)', '보안등649') },
+				{ latlng: new kakao.maps.LatLng(37.6000111111111, 127.142630555556), content: makeDiv('보안등(111)', '보안등650') },
+				{ latlng: new kakao.maps.LatLng(37.5998083333333, 127.142625000000), content: makeDiv('보안등(111)', '보안등651') },
+				{ latlng: new kakao.maps.LatLng(37.5996083333333, 127.142416666667), content: makeDiv('보안등(111)', '보안등652') },
+				{ latlng: new kakao.maps.LatLng(37.5999722222222, 127.142472222222), content: makeDiv('보안등(111)', '보안등653') },
+				{ latlng: new kakao.maps.LatLng(37.6000444444444, 127.142241666667), content: makeDiv('보안등(111)', '보안등654') },
+				{ latlng: new kakao.maps.LatLng(37.6003750000000, 127.142266666667), content: makeDiv('보안등(111)', '보안등655') },
+				{ latlng: new kakao.maps.LatLng(37.6001777777778, 127.142569444444), content: makeDiv('보안등(111)', '보안등656') },
+				{ latlng: new kakao.maps.LatLng(37.6004527777778, 127.142866666667), content: makeDiv('보안등(111)', '보안등657') },
+				{ latlng: new kakao.maps.LatLng(37.6008111111111, 127.142927777778), content: makeDiv('보안등(111)', '보안등658') },
+				{ latlng: new kakao.maps.LatLng(37.6012611111111, 127.143386111111), content: makeDiv('보안등(111)', '보안등661') },
+				{ latlng: new kakao.maps.LatLng(37.6011972222222, 127.142441666667), content: makeDiv('보안등(111)', '보안등662') },
+				{ latlng: new kakao.maps.LatLng(37.6011083333333, 127.142661111111), content: makeDiv('보안등(111)', '보안등663') },
+				{ latlng: new kakao.maps.LatLng(37.6008416666667, 127.142563888889), content: makeDiv('보안등(111)', '보안등664') },
+				{ latlng: new kakao.maps.LatLng(37.6010777777778, 127.142266666667), content: makeDiv('보안등(111)', '보안등665') },
+				{ latlng: new kakao.maps.LatLng(37.6011722222222, 127.142455555556), content: makeDiv('보안등(111)', '보안등666') },
+				{ latlng: new kakao.maps.LatLng(37.6009722222222, 127.142319444444), content: makeDiv('보안등(111)', '보안등667') },
+				{ latlng: new kakao.maps.LatLng(37.6008833333333, 127.142363888889), content: makeDiv('보안등(111)', '보안등668') },
+				{ latlng: new kakao.maps.LatLng(37.6012416666667, 127.141411111111), content: makeDiv('보안등(111)', '보안등669') },
+				{ latlng: new kakao.maps.LatLng(37.6006555555556, 127.144372222222), content: makeDiv('보안등(111)', '보안등691') },
+				{ latlng: new kakao.maps.LatLng(37.6001472222222, 127.146225000000), content: makeDiv('보안등(111)', '보안등730') },
+				{ latlng: new kakao.maps.LatLng(37.5999027777778, 127.146758333333), content: makeDiv('보안등(111)', '보안등731') },
+				{ latlng: new kakao.maps.LatLng(37.6007222222222, 127.142013888889), content: makeDiv('보안등(111)', '보안등x01') },
+				{ latlng: new kakao.maps.LatLng(37.5991083333333, 127.143172222222), content: makeDiv('보안등(111)', '보안등x02') },
+				{ latlng: new kakao.maps.LatLng(37.6009777777778, 127.141516666667), content: makeDiv('보안등(111)', '보안등x03') },
+				{ latlng: new kakao.maps.LatLng(37.5981916666667, 127.144280555556), content: makeDiv('보안등(111)', '보안등x04') },
+				{ latlng: new kakao.maps.LatLng(37.5988111111111, 127.145486111111), content: makeDiv('보안등(111)', '보안등x05') },
+				{ latlng: new kakao.maps.LatLng(37.6011305555556, 127.142394444444), content: makeDiv('보안등(111)', '보안등x06') },
+				{ latlng: new kakao.maps.LatLng(37.6007055555556, 127.141594444444), content: makeDiv('보안등(111)', '보안등x07') },
+				{ latlng: new kakao.maps.LatLng(37.6008111111111, 127.145041666667), content: makeDiv('보안등(111)', '보안등x08') },
+			], [ // 공원등
+				{ latlng: new kakao.maps.LatLng(37.6008861111111, 127.141572222222), content: makeDiv('공원등(13)', '돌다리1') },
+				{ latlng: new kakao.maps.LatLng(37.6010138888889, 127.141783333333), content: makeDiv('공원등(13)', '돌다리2') },
+				{ latlng: new kakao.maps.LatLng(37.6012500000000, 127.142258333333), content: makeDiv('공원등(13)', '돌다리3') },
+				{ latlng: new kakao.maps.LatLng(37.6012888888889, 127.142311111111), content: makeDiv('공원등(13)', '돌다리4') },
+				{ latlng: new kakao.maps.LatLng(37.6010444444444, 127.142455555556), content: makeDiv('공원등(13)', '여울목1') },
+				{ latlng: new kakao.maps.LatLng(37.6010194444444, 127.142319444444), content: makeDiv('공원등(13)', '여울목2') },
+				{ latlng: new kakao.maps.LatLng(37.6009944444444, 127.142311111111), content: makeDiv('공원등(13)', '여울목3') },
+				{ latlng: new kakao.maps.LatLng(37.6008944444444, 127.142341666667), content: makeDiv('공원등(13)', '여울목4') },
+				{ latlng: new kakao.maps.LatLng(37.6009250000000, 127.142477777778), content: makeDiv('공원등(13)', '여울목5') },
+				{ latlng: new kakao.maps.LatLng(37.6009333333333, 127.142402777778), content: makeDiv('공원등(13)', '여울목6') },
+				{ latlng: new kakao.maps.LatLng(37.6011083333333, 127.142380555556), content: makeDiv('공원등(13)', '여울목7') },
+				{ latlng: new kakao.maps.LatLng(37.6010333333333, 127.142350000000), content: makeDiv('공원등(13)', '여울목8') },
+				{ latlng: new kakao.maps.LatLng(37.6011416666667, 127.142411111111), content: makeDiv('공원등(13)', '여울목9') },
+			], [ // 주차등
+				{ latlng: new kakao.maps.LatLng(37.6004611111111, 127.145827777778), content: makeDiv('주차등(21)', '주차등x01') },
+				{ latlng: new kakao.maps.LatLng(37.6004944444444, 127.145866666667), content: makeDiv('주차등(21)', '주차등x02') },
+				{ latlng: new kakao.maps.LatLng(37.6000333333333, 127.146111111111), content: makeDiv('주차등(21)', '주차등x03') },
+				{ latlng: new kakao.maps.LatLng(37.5999000000000, 127.146544444444), content: makeDiv('주차등(21)', '주차등x04') },
+				{ latlng: new kakao.maps.LatLng(37.5996805555556, 127.146697222222), content: makeDiv('주차등(21)', '주차등x05') },
+				{ latlng: new kakao.maps.LatLng(37.5998944444444, 127.146758333333), content: makeDiv('주차등(21)', '주차등x06') },
+				{ latlng: new kakao.maps.LatLng(37.5999027777778, 127.146636111111), content: makeDiv('주차등(21)', '주차등x07') },
+				{ latlng: new kakao.maps.LatLng(37.5998638888889, 127.146308333333), content: makeDiv('주차등(21)', '주차등x08') },
+				{ latlng: new kakao.maps.LatLng(37.6009111111111, 127.145180555556), content: makeDiv('주차등(21)', '주차등x09') },
+				{ latlng: new kakao.maps.LatLng(37.6006194444444, 127.145263888889), content: makeDiv('주차등(21)', '주차등x10') },
+				{ latlng: new kakao.maps.LatLng(37.6011083333333, 127.144822222222), content: makeDiv('주차등(21)', '주차등x11') },
+				{ latlng: new kakao.maps.LatLng(37.6010500000000, 127.144836111111), content: makeDiv('주차등(21)', '주차등x12') },
+				{ latlng: new kakao.maps.LatLng(37.6012083333333, 127.144469444444), content: makeDiv('주차등(21)', '주차등x13') },
+				{ latlng: new kakao.maps.LatLng(37.6013638888889, 127.144608333333), content: makeDiv('주차등(21)', '주차등x14') },
+				{ latlng: new kakao.maps.LatLng(37.6013666666667, 127.143997222222), content: makeDiv('주차등(21)', '주차등x15') },
+				{ latlng: new kakao.maps.LatLng(37.6017305555556, 127.143044444444), content: makeDiv('주차등(21)', '주차등x16') },
+				{ latlng: new kakao.maps.LatLng(37.6016694444444, 127.143141666667), content: makeDiv('주차등(21)', '주차등x17') },
+				{ latlng: new kakao.maps.LatLng(37.6015972222222, 127.142441666667), content: makeDiv('주차등(21)', '주차등x18') },
+				{ latlng: new kakao.maps.LatLng(37.6015138888889, 127.142608333333), content: makeDiv('주차등(21)', '주차등x19') },
+				{ latlng: new kakao.maps.LatLng(37.6015638888889, 127.143372222222), content: makeDiv('주차등(21)', '주차등x20') },
+				{ latlng: new kakao.maps.LatLng(37.6015916666667, 127.142783333333), content: makeDiv('주차등(21)', '주차등x21') },
+			], [ // 아파트등
+				{ latlng: new kakao.maps.LatLng(37.5993527777778, 127.145019444444), content: makeDiv('아파트등(9)', '아파트등x01') },
+				{ latlng: new kakao.maps.LatLng(37.5994611111111, 127.145211111111), content: makeDiv('아파트등(9)', '아파트등x02') },
+				{ latlng: new kakao.maps.LatLng(37.5991777777778, 127.145486111111), content: makeDiv('아파트등(9)', '아파트등x03') },
+				{ latlng: new kakao.maps.LatLng(37.5988722222222, 127.145355555556), content: makeDiv('아파트등(9)', '아파트등x04') },
+				{ latlng: new kakao.maps.LatLng(37.5993527777778, 127.145186111111), content: makeDiv('아파트등(9)', '아파트등x05') },
+				{ latlng: new kakao.maps.LatLng(37.5991527777778, 127.145272222222), content: makeDiv('아파트등(9)', '아파트등x06') },
+				{ latlng: new kakao.maps.LatLng(37.5988000000000, 127.145500000000), content: makeDiv('아파트등(9)', '아파트등x07') },
+				{ latlng: new kakao.maps.LatLng(37.5997611111111, 127.145163888889), content: makeDiv('아파트등(9)', '아파트등x08') },
+				{ latlng: new kakao.maps.LatLng(37.5992055555556, 127.145202777778), content: makeDiv('아파트등(9)', '아파트등x09') },
+			], [ // 고보조명
+				{ latlng: new kakao.maps.LatLng(37.6009611111111, 127.143058333333), content: makeDiv('고보조명(4)', '고보조명x01') },
+				{ latlng: new kakao.maps.LatLng(37.5991527777778, 127.146111111111), content: makeDiv('고보조명(4)', '고보조명x02') },
+				{ latlng: new kakao.maps.LatLng(37.6002833333333, 127.144263888889), content: makeDiv('고보조명(4)', '고보조명x03') },
+				{ latlng: new kakao.maps.LatLng(37.5993944444444, 127.143250000000), content: makeDiv('고보조명(4)', '고보조명x04') },
+			], [ // 전신주
+				{ latlng: new kakao.maps.LatLng(37.6009250000000, 127.141563888889), content: makeDiv('전신주(111)', '전신주001') },
+				{ latlng: new kakao.maps.LatLng(37.6006888888889, 127.141577777778), content: makeDiv('전신주(111)', '전신주002') },
+				{ latlng: new kakao.maps.LatLng(37.6003611111111, 127.141669444444), content: makeDiv('전신주(111)', '전신주003') },
+				{ latlng: new kakao.maps.LatLng(37.6014111111111, 127.142386111111), content: makeDiv('전신주(111)', '전신주015') },
+				{ latlng: new kakao.maps.LatLng(37.6012277777778, 127.141930555556), content: makeDiv('전신주(111)', '전신주016') },
+				{ latlng: new kakao.maps.LatLng(37.5990027777778, 127.142608333333), content: makeDiv('전신주(111)', '전신주036') },
+				{ latlng: new kakao.maps.LatLng(37.5992972222222, 127.142555555556), content: makeDiv('전신주(111)', '전신주042') },
+				{ latlng: new kakao.maps.LatLng(37.5995555555556, 127.142822222222), content: makeDiv('전신주(111)', '전신주051') },
+				{ latlng: new kakao.maps.LatLng(37.5995777777778, 127.142486111111), content: makeDiv('전신주(111)', '전신주052') },
+				{ latlng: new kakao.maps.LatLng(37.5995861111111, 127.142288888889), content: makeDiv('전신주(111)', '전신주054') },
+				{ latlng: new kakao.maps.LatLng(37.5998194444444, 127.142669444444), content: makeDiv('전신주(111)', '전신주061') },
+				{ latlng: new kakao.maps.LatLng(37.5999444444444, 127.142630555556), content: makeDiv('전신주(111)', '전신주062') },
+				{ latlng: new kakao.maps.LatLng(37.6004916666667, 127.142897222222), content: makeDiv('전신주(111)', '전신주071') },
+				{ latlng: new kakao.maps.LatLng(37.6009916666667, 127.142350000000), content: makeDiv('전신주(111)', '전신주072') },
+				{ latlng: new kakao.maps.LatLng(37.6008444444444, 127.142272222222), content: makeDiv('전신주(111)', '전신주073') },
+				{ latlng: new kakao.maps.LatLng(37.6010750000000, 127.142813888889), content: makeDiv('전신주(111)', '전신주081') },
+				{ latlng: new kakao.maps.LatLng(37.6011083333333, 127.142311111111), content: makeDiv('전신주(111)', '전신주082') },
+				{ latlng: new kakao.maps.LatLng(37.6010750000000, 127.142800000000), content: makeDiv('전신주(111)', '전신주084') },
+				{ latlng: new kakao.maps.LatLng(37.5985527777778, 127.143294444444), content: makeDiv('전신주(111)', '전신주122') },
+				{ latlng: new kakao.maps.LatLng(37.5980611111111, 127.143263888889), content: makeDiv('전신주(111)', '전신주126') },
+				{ latlng: new kakao.maps.LatLng(37.5985194444444, 127.142922222222), content: makeDiv('전신주(111)', '전신주127') },
+				{ latlng: new kakao.maps.LatLng(37.5992083333333, 127.143150000000), content: makeDiv('전신주(111)', '전신주131') },
+				{ latlng: new kakao.maps.LatLng(37.5987805555556, 127.142791666667), content: makeDiv('전신주(111)', '전신주133') },
+				{ latlng: new kakao.maps.LatLng(37.5992388888889, 127.143258333333), content: makeDiv('전신주(111)', '전신주143') },
+				{ latlng: new kakao.maps.LatLng(37.5997861111111, 127.143172222222), content: makeDiv('전신주(111)', '전신주151') },
+				{ latlng: new kakao.maps.LatLng(37.6001361111111, 127.142958333333), content: makeDiv('전신주(111)', '전신주161') },
+				{ latlng: new kakao.maps.LatLng(37.6003000000000, 127.143761111111), content: makeDiv('전신주(111)', '전신주162') },
+				{ latlng: new kakao.maps.LatLng(37.6008527777778, 127.143050000000), content: makeDiv('전신주(111)', '전신주171') },
+				{ latlng: new kakao.maps.LatLng(37.6005750000000, 127.143402777778), content: makeDiv('전신주(111)', '전신주172') },
+				{ latlng: new kakao.maps.LatLng(37.6007305555556, 127.142761111111), content: makeDiv('전신주(111)', '전신주174') },
+				{ latlng: new kakao.maps.LatLng(37.6016388888889, 127.143494444444), content: makeDiv('전신주(111)', '전신주181') },
+				{ latlng: new kakao.maps.LatLng(37.5979722222222, 127.143325000000), content: makeDiv('전신주(111)', '전신주211') },
+				{ latlng: new kakao.maps.LatLng(37.5980750000000, 127.143713888889), content: makeDiv('전신주(111)', '전신주221') },
+				{ latlng: new kakao.maps.LatLng(37.5983250000000, 127.143647222222), content: makeDiv('전신주(111)', '전신주222') },
+				{ latlng: new kakao.maps.LatLng(37.5983916666667, 127.144050000000), content: makeDiv('전신주(111)', '전신주223') },
+				{ latlng: new kakao.maps.LatLng(37.5989416666667, 127.143861111111), content: makeDiv('전신주(111)', '전신주231') },
+				{ latlng: new kakao.maps.LatLng(37.5988000000000, 127.144036111111), content: makeDiv('전신주(111)', '전신주232') },
+				{ latlng: new kakao.maps.LatLng(37.5986555555556, 127.143730555556), content: makeDiv('전신주(111)', '전신주233') },
+				{ latlng: new kakao.maps.LatLng(37.5992055555556, 127.143927777778), content: makeDiv('전신주(111)', '전신주241') },
+				{ latlng: new kakao.maps.LatLng(37.5995861111111, 127.144225000000), content: makeDiv('전신주(111)', '전신주242') },
+				{ latlng: new kakao.maps.LatLng(37.5999111111111, 127.143677777778), content: makeDiv('전신주(111)', '전신주251') },
+				{ latlng: new kakao.maps.LatLng(37.5999027777778, 127.143691666667), content: makeDiv('전신주(111)', '전신주252') },
+				{ latlng: new kakao.maps.LatLng(37.6003833333333, 127.143988888889), content: makeDiv('전신주(111)', '전신주271') },
+				{ latlng: new kakao.maps.LatLng(37.6007611111111, 127.143852777778), content: makeDiv('전신주(111)', '전신주272') },
+				{ latlng: new kakao.maps.LatLng(37.6014222222222, 127.143647222222), content: makeDiv('전신주(111)', '전신주281') },
+				{ latlng: new kakao.maps.LatLng(37.6011000000000, 127.144158333333), content: makeDiv('전신주(111)', '전신주282') },
+				{ latlng: new kakao.maps.LatLng(37.6015805555556, 127.143227777778), content: makeDiv('전신주(111)', '전신주293') },
+				{ latlng: new kakao.maps.LatLng(37.5981722222222, 127.144202777778), content: makeDiv('전신주(111)', '전신주321') },
+				{ latlng: new kakao.maps.LatLng(37.5981833333333, 127.144141666667), content: makeDiv('전신주(111)', '전신주322') },
+				{ latlng: new kakao.maps.LatLng(37.5991555555556, 127.144700000000), content: makeDiv('전신주(111)', '전신주342') },
+				{ latlng: new kakao.maps.LatLng(37.5989694444444, 127.143936111111), content: makeDiv('전신주(111)', '전신주343') },
+				{ latlng: new kakao.maps.LatLng(37.5995750000000, 127.144455555556), content: makeDiv('전신주(111)', '전신주351') },
+				{ latlng: new kakao.maps.LatLng(37.5997277777778, 127.144263888889), content: makeDiv('전신주(111)', '전신주352') },
+				{ latlng: new kakao.maps.LatLng(37.5998222222222, 127.144333333333), content: makeDiv('전신주(111)', '전신주353') },
+				{ latlng: new kakao.maps.LatLng(37.5997361111111, 127.143922222222), content: makeDiv('전신주(111)', '전신주354') },
+				{ latlng: new kakao.maps.LatLng(37.6003750000000, 127.144080555556), content: makeDiv('전신주(111)', '전신주361') },
+				{ latlng: new kakao.maps.LatLng(37.6000861111111, 127.144700000000), content: makeDiv('전신주(111)', '전신주362') },
+				{ latlng: new kakao.maps.LatLng(37.6007000000000, 127.144416666667), content: makeDiv('전신주(111)', '전신주371') },
+				{ latlng: new kakao.maps.LatLng(37.6009972222222, 127.144652777778), content: makeDiv('전신주(111)', '전신주374') },
+				{ latlng: new kakao.maps.LatLng(37.6005138888889, 127.144552777778), content: makeDiv('전신주(111)', '전신주375') },
+				{ latlng: new kakao.maps.LatLng(37.6013527777778, 127.144111111111), content: makeDiv('전신주(111)', '전신주381') },
+				{ latlng: new kakao.maps.LatLng(37.5982444444444, 127.144486111111), content: makeDiv('전신주(111)', '전신주423') },
+				{ latlng: new kakao.maps.LatLng(37.5988777777778, 127.144744444444), content: makeDiv('전신주(111)', '전신주431') },
+				{ latlng: new kakao.maps.LatLng(37.5985055555556, 127.144905555556), content: makeDiv('전신주(111)', '전신주432') },
+				{ latlng: new kakao.maps.LatLng(37.5992055555556, 127.144766666667), content: makeDiv('전신주(111)', '전신주441') },
+				{ latlng: new kakao.maps.LatLng(37.5991555555556, 127.144883333333), content: makeDiv('전신주(111)', '전신주443') },
+				{ latlng: new kakao.maps.LatLng(37.5997277777778, 127.145102777778), content: makeDiv('전신주(111)', '전신주451') },
+				{ latlng: new kakao.maps.LatLng(37.5997361111111, 127.145211111111), content: makeDiv('전신주(111)', '전신주452') },
+				{ latlng: new kakao.maps.LatLng(37.6001027777778, 127.144913888889), content: makeDiv('전신주(111)', '전신주461') },
+				{ latlng: new kakao.maps.LatLng(37.6011500000000, 127.144888888889), content: makeDiv('전신주(111)', '전신주471') },
+				{ latlng: new kakao.maps.LatLng(37.6009111111111, 127.144783333333), content: makeDiv('전신주(111)', '전신주473') },
+				{ latlng: new kakao.maps.LatLng(37.6005277777778, 127.144866666667), content: makeDiv('전신주(111)', '전신주474') },
+				{ latlng: new kakao.maps.LatLng(37.5995305555556, 127.145447222222), content: makeDiv('전신주(111)', '전신주522') },
+				{ latlng: new kakao.maps.LatLng(37.5985305555556, 127.145119444444), content: makeDiv('전신주(111)', '전신주532') },
+				{ latlng: new kakao.maps.LatLng(37.5994388888889, 127.145286111111), content: makeDiv('전신주(111)', '전신주541') },
+				{ latlng: new kakao.maps.LatLng(37.5992888888889, 127.145638888889), content: makeDiv('전신주(111)', '전신주542') },
+				{ latlng: new kakao.maps.LatLng(37.5997166666667, 127.145194444444), content: makeDiv('전신주(111)', '전신주551') },
+				{ latlng: new kakao.maps.LatLng(37.6000527777778, 127.145263888889), content: makeDiv('전신주(111)', '전신주561') },
+				{ latlng: new kakao.maps.LatLng(37.6004222222222, 127.145552777778), content: makeDiv('전신주(111)', '전신주562') },
+				{ latlng: new kakao.maps.LatLng(37.6002916666667, 127.145644444444), content: makeDiv('전신주(111)', '전신주563') },
+				{ latlng: new kakao.maps.LatLng(37.5997916666667, 127.145797222222), content: makeDiv('전신주(111)', '전신주564') },
+				{ latlng: new kakao.maps.LatLng(37.6006666666667, 127.145683333333), content: makeDiv('전신주(111)', '전신주566') },
+				{ latlng: new kakao.maps.LatLng(37.6006611111111, 127.145141666667), content: makeDiv('전신주(111)', '전신주571') },
+				{ latlng: new kakao.maps.LatLng(37.5992083333333, 127.145941666667), content: makeDiv('전신주(111)', '전신주641') },
+				{ latlng: new kakao.maps.LatLng(37.5990444444444, 127.146033333333), content: makeDiv('전신주(111)', '전신주642') },
+				{ latlng: new kakao.maps.LatLng(37.5990972222222, 127.146125000000), content: makeDiv('전신주(111)', '전신주643') },
+				{ latlng: new kakao.maps.LatLng(37.5988722222222, 127.145363888889), content: makeDiv('전신주(111)', '전신주645') },
+				{ latlng: new kakao.maps.LatLng(37.6005888888889, 127.145613888889), content: makeDiv('전신주(111)', '전신주661') },
+				{ latlng: new kakao.maps.LatLng(37.6002055555556, 127.146208333333), content: makeDiv('전신주(111)', '전신주662') },
+				{ latlng: new kakao.maps.LatLng(37.6000222222222, 127.146119444444), content: makeDiv('전신주(111)', '전신주663') },
+				{ latlng: new kakao.maps.LatLng(37.5991472222222, 127.146361111111), content: makeDiv('전신주(111)', '전신주741') },
+				{ latlng: new kakao.maps.LatLng(37.5998638888889, 127.146836111111), content: makeDiv('전신주(111)', '전신주751') },
+				{ latlng: new kakao.maps.LatLng(37.5999194444444, 127.146391666667), content: makeDiv('전신주(111)', '전신주752') },
+				{ latlng: new kakao.maps.LatLng(37.5995138888889, 127.146888888889), content: makeDiv('전신주(111)', '전신주842') },
+				{ latlng: new kakao.maps.LatLng(37.6012722222222, 127.141472222222), content: makeDiv('전신주(111)', '전신주874') },
+				{ latlng: new kakao.maps.LatLng(37.6000416666667, 127.141991666667), content: makeDiv('전신주(111)', '전신주955') },
+				{ latlng: new kakao.maps.LatLng(37.6003805555556, 127.142288888889), content: makeDiv('전신주(111)', '전신주961') },
+				{ latlng: new kakao.maps.LatLng(37.6002055555556, 127.141913888889), content: makeDiv('전신주(111)', '전신주962') },
+				{ latlng: new kakao.maps.LatLng(37.6005777777778, 127.142150000000), content: makeDiv('전신주(111)', '전신주971') },
+				{ latlng: new kakao.maps.LatLng(37.6012805555556, 127.142394444444), content: makeDiv('전신주(111)', '전신주982') },
+				{ latlng: new kakao.maps.LatLng(37.5999611111111, 127.145813888889), content: makeDiv('전신주(111)', '전신주x01') },
+				{ latlng: new kakao.maps.LatLng(37.5993416666667, 127.143250000000), content: makeDiv('전신주(111)', '전신주x03') },
+				{ latlng: new kakao.maps.LatLng(37.6010638888889, 127.142508333333), content: makeDiv('전신주(111)', '전신주x05') },
+				{ latlng: new kakao.maps.LatLng(37.6009416666667, 127.142272222222), content: makeDiv('전신주(111)', '전신주x06') },
+				{ latlng: new kakao.maps.LatLng(37.6008500000000, 127.142250000000), content: makeDiv('전신주(111)', '전신주x07') },
+				{ latlng: new kakao.maps.LatLng(37.6016055555556, 127.142769444444), content: makeDiv('전신주(111)', '전신주x08') },
+				{ latlng: new kakao.maps.LatLng(37.6010166666667, 127.141586111111), content: makeDiv('전신주(111)', '전신주x09') },
+				{ latlng: new kakao.maps.LatLng(37.5994250000000, 127.143141666667), content: makeDiv('전신주(111)', '전신주x10') },
+				{ latlng: new kakao.maps.LatLng(37.6010472222222, 127.142311111111), content: makeDiv('전신주(111)', '전신주x11') },
+				{ latlng: new kakao.maps.LatLng(37.6004444444444, 127.142044444444), content: makeDiv('전신주(111)', '전신주x12') },
+				{ latlng: new kakao.maps.LatLng(37.5986722222222, 127.142866666667), content: makeDiv('전신주(111)', '전신주x13') },
+			], [ // 통신주
+				{ latlng: new kakao.maps.LatLng(37.5992305555556, 127.144858333333), content: makeDiv('통신주(72)', '통신주x01') },
+				{ latlng: new kakao.maps.LatLng(37.5991333333333, 127.145133333333), content: makeDiv('통신주(72)', '통신주x02') },
+				{ latlng: new kakao.maps.LatLng(37.5994611111111, 127.145286111111), content: makeDiv('통신주(72)', '통신주x03') },
+				{ latlng: new kakao.maps.LatLng(37.5993277777778, 127.145691666667), content: makeDiv('통신주(72)', '통신주x04') },
+				{ latlng: new kakao.maps.LatLng(37.5991083333333, 127.145880555556), content: makeDiv('통신주(72)', '통신주x05') },
+				{ latlng: new kakao.maps.LatLng(37.5981250000000, 127.144250000000), content: makeDiv('통신주(72)', '통신주x06') },
+				{ latlng: new kakao.maps.LatLng(37.5991388888889, 127.146102777778), content: makeDiv('통신주(72)', '통신주x07') },
+				{ latlng: new kakao.maps.LatLng(37.5989500000000, 127.146050000000), content: makeDiv('통신주(72)', '통신주x08') },
+				{ latlng: new kakao.maps.LatLng(37.5995416666667, 127.145363888889), content: makeDiv('통신주(72)', '통신주x09') },
+				{ latlng: new kakao.maps.LatLng(37.5997916666667, 127.145141666667), content: makeDiv('통신주(72)', '통신주x10') },
+				{ latlng: new kakao.maps.LatLng(37.5996972222222, 127.145172222222), content: makeDiv('통신주(72)', '통신주x11') },
+				{ latlng: new kakao.maps.LatLng(37.6004055555556, 127.145666666667), content: makeDiv('통신주(72)', '통신주x12') },
+				{ latlng: new kakao.maps.LatLng(37.6004138888889, 127.145447222222), content: makeDiv('통신주(72)', '통신주x13') },
+				{ latlng: new kakao.maps.LatLng(37.6001638888889, 127.144975000000), content: makeDiv('통신주(72)', '통신주x14') },
+				{ latlng: new kakao.maps.LatLng(37.5991083333333, 127.144211111111), content: makeDiv('통신주(72)', '통신주x15') },
+				{ latlng: new kakao.maps.LatLng(37.5993833333333, 127.143988888889), content: makeDiv('통신주(72)', '통신주x16') },
+				{ latlng: new kakao.maps.LatLng(37.5998694444444, 127.143997222222), content: makeDiv('통신주(72)', '통신주x17') },
+				{ latlng: new kakao.maps.LatLng(37.5994555555556, 127.143805555556), content: makeDiv('통신주(72)', '통신주x18') },
+				{ latlng: new kakao.maps.LatLng(37.5995444444444, 127.143700000000), content: makeDiv('통신주(72)', '통신주x19') },
+				{ latlng: new kakao.maps.LatLng(37.5997555555556, 127.144286111111), content: makeDiv('통신주(72)', '통신주x20') },
+				{ latlng: new kakao.maps.LatLng(37.5998333333333, 127.144311111111), content: makeDiv('통신주(72)', '통신주x21') },
+				{ latlng: new kakao.maps.LatLng(37.6004111111111, 127.144875000000), content: makeDiv('통신주(72)', '통신주x22') },
+				{ latlng: new kakao.maps.LatLng(37.6003527777778, 127.144508333333), content: makeDiv('통신주(72)', '통신주x23') },
+				{ latlng: new kakao.maps.LatLng(37.6000361111111, 127.143852777778), content: makeDiv('통신주(72)', '통신주x24') },
+				{ latlng: new kakao.maps.LatLng(37.5986361111111, 127.143997222222), content: makeDiv('통신주(72)', '통신주x25') },
+				{ latlng: new kakao.maps.LatLng(37.5989722222222, 127.143722222222), content: makeDiv('통신주(72)', '통신주x26') },
+				{ latlng: new kakao.maps.LatLng(37.6003416666667, 127.144225000000), content: makeDiv('통신주(72)', '통신주x27') },
+				{ latlng: new kakao.maps.LatLng(37.6010138888889, 127.144133333333), content: makeDiv('통신주(72)', '통신주x28') },
+				{ latlng: new kakao.maps.LatLng(37.6004638888889, 127.143775000000), content: makeDiv('통신주(72)', '통신주x29') },
+				{ latlng: new kakao.maps.LatLng(37.6001277777778, 127.143425000000), content: makeDiv('통신주(72)', '통신주x30') },
+				{ latlng: new kakao.maps.LatLng(37.6008138888889, 127.143844444444), content: makeDiv('통신주(72)', '통신주x31') },
+				{ latlng: new kakao.maps.LatLng(37.6004194444444, 127.143538888889), content: makeDiv('통신주(72)', '통신주x32') },
+				{ latlng: new kakao.maps.LatLng(37.6006000000000, 127.143433333333), content: makeDiv('통신주(72)', '통신주x33') },
+				{ latlng: new kakao.maps.LatLng(37.6006500000000, 127.143525000000), content: makeDiv('통신주(72)', '통신주x34') },
+				{ latlng: new kakao.maps.LatLng(37.6007194444444, 127.143547222222), content: makeDiv('통신주(72)', '통신주x35') },
+				{ latlng: new kakao.maps.LatLng(37.6010194444444, 127.143416666667), content: makeDiv('통신주(72)', '통신주x36') },
+				{ latlng: new kakao.maps.LatLng(37.6007277777778, 127.142988888889), content: makeDiv('통신주(72)', '통신주x37') },
+				{ latlng: new kakao.maps.LatLng(37.6009027777778, 127.143097222222), content: makeDiv('통신주(72)', '통신주x38') },
+				{ latlng: new kakao.maps.LatLng(37.5999250000000, 127.142013888889), content: makeDiv('통신주(72)', '통신주x39') },
+				{ latlng: new kakao.maps.LatLng(37.6009833333333, 127.143097222222), content: makeDiv('통신주(72)', '통신주x40') },
+				{ latlng: new kakao.maps.LatLng(37.6012694444444, 127.143411111111), content: makeDiv('통신주(72)', '통신주x41') },
+				{ latlng: new kakao.maps.LatLng(37.6010166666667, 127.142211111111), content: makeDiv('통신주(72)', '통신주x42') },
+				{ latlng: new kakao.maps.LatLng(37.6011083333333, 127.142325000000), content: makeDiv('통신주(72)', '통신주x43') },
+				{ latlng: new kakao.maps.LatLng(37.6004527777778, 127.142783333333), content: makeDiv('통신주(72)', '통신주x44') },
+				{ latlng: new kakao.maps.LatLng(37.5999750000000, 127.142686111111), content: makeDiv('통신주(72)', '통신주x45') },
+				{ latlng: new kakao.maps.LatLng(37.6000055555556, 127.142791666667), content: makeDiv('통신주(72)', '통신주x46') },
+				{ latlng: new kakao.maps.LatLng(37.5996194444444, 127.142533333333), content: makeDiv('통신주(72)', '통신주x47') },
+				{ latlng: new kakao.maps.LatLng(37.5995944444444, 127.142600000000), content: makeDiv('통신주(72)', '통신주x48') },
+				{ latlng: new kakao.maps.LatLng(37.5993305555556, 127.143241666667), content: makeDiv('통신주(72)', '통신주x49') },
+				{ latlng: new kakao.maps.LatLng(37.5993055555556, 127.143272222222), content: makeDiv('통신주(72)', '통신주x50') },
+				{ latlng: new kakao.maps.LatLng(37.5988583333333, 127.143647222222), content: makeDiv('통신주(72)', '통신주x51') },
+				{ latlng: new kakao.maps.LatLng(37.5985194444444, 127.143416666667), content: makeDiv('통신주(72)', '통신주x52') },
+				{ latlng: new kakao.maps.LatLng(37.5986333333333, 127.143761111111), content: makeDiv('통신주(72)', '통신주x53') },
+				{ latlng: new kakao.maps.LatLng(37.5982888888889, 127.144072222222), content: makeDiv('통신주(72)', '통신주x54') },
+				{ latlng: new kakao.maps.LatLng(37.5978388888889, 127.143494444444), content: makeDiv('통신주(72)', '통신주x55') },
+				{ latlng: new kakao.maps.LatLng(37.5979416666667, 127.143341666667), content: makeDiv('통신주(72)', '통신주x56') },
+				{ latlng: new kakao.maps.LatLng(37.5980138888889, 127.143219444444), content: makeDiv('통신주(72)', '통신주x57') },
+				{ latlng: new kakao.maps.LatLng(37.5983361111111, 127.143150000000), content: makeDiv('통신주(72)', '통신주x58') },
+				{ latlng: new kakao.maps.LatLng(37.6001583333333, 127.142508333333), content: makeDiv('통신주(72)', '통신주x59') },
+				{ latlng: new kakao.maps.LatLng(37.6003444444444, 127.142363888889), content: makeDiv('통신주(72)', '통신주x60') },
+				{ latlng: new kakao.maps.LatLng(37.6008527777778, 127.142197222222), content: makeDiv('통신주(72)', '통신주x61') },
+				{ latlng: new kakao.maps.LatLng(37.6006972222222, 127.144425000000), content: makeDiv('통신주(72)', '통신주x62') },
+				{ latlng: new kakao.maps.LatLng(37.6009222222222, 127.144736111111), content: makeDiv('통신주(72)', '통신주x63') },
+				{ latlng: new kakao.maps.LatLng(37.6000361111111, 127.146255555556), content: makeDiv('통신주(72)', '통신주x64') },
+				{ latlng: new kakao.maps.LatLng(37.6014138888889, 127.143975000000), content: makeDiv('통신주(72)', '통신주x65') },
+				{ latlng: new kakao.maps.LatLng(37.6010472222222, 127.141594444444), content: makeDiv('통신주(72)', '통신주x66') },
+				{ latlng: new kakao.maps.LatLng(37.6003138888889, 127.141669444444), content: makeDiv('통신주(72)', '통신주x67') },
+				{ latlng: new kakao.maps.LatLng(37.6011194444444, 127.141961111111), content: makeDiv('통신주(72)', '통신주x68') },
+				{ latlng: new kakao.maps.LatLng(37.6001166666667, 127.142897222222), content: makeDiv('통신주(72)', '통신주x69') },
+				{ latlng: new kakao.maps.LatLng(37.5987027777778, 127.145316666667), content: makeDiv('통신주(72)', '통신주x70') },
+				{ latlng: new kakao.maps.LatLng(37.5998583333333, 127.146736111111), content: makeDiv('통신주(72)', '통신주x71') },
+				{ latlng: new kakao.maps.LatLng(37.6011111111111, 127.143547222222), content: makeDiv('통신주(72)', '통신주x72') },
+			], [ // CCTV
+				{ latlng: new kakao.maps.LatLng(37.5993000000000, 127.143263888889), content: makeDiv('CCTV-SOS(11)', 'CCTV-A-수-001-SOS') },
+				{ latlng: new kakao.maps.LatLng(37.6011000000000, 127.144752777778), content: makeDiv('CCTV-SOS(11)', 'CCTV-A-수-002-SOS') },
+				{ latlng: new kakao.maps.LatLng(37.6003277777778, 127.144286111111), content: makeDiv('CCTV-SOS(11)', 'CCTV-A-수-005-SOS') },
+				{ latlng: new kakao.maps.LatLng(37.5991944444444, 127.144866666667), content: makeDiv('CCTV-SOS(11)', 'CCTV-A-수-010-SOS') },
+				{ latlng: new kakao.maps.LatLng(37.6008250000000, 127.143127777778), content: makeDiv('CCTV-SOS(11)', 'CCTV-A-수-013-SOS') },
+				{ latlng: new kakao.maps.LatLng(37.6008000000000, 127.145600000000), content: makeDiv('CCTV-SOS(11)', 'CCTV-A-수-025-SOS') },
+				{ latlng: new kakao.maps.LatLng(37.6008805555556, 127.142433333333), content: makeDiv('CCTV-SOS(11)', 'CCTV-A-수-029-SOS') },
+				{ latlng: new kakao.maps.LatLng(37.5988083333333, 127.145705555556), content: makeDiv('CCTV-SOS(11)', 'CCTV-A-수-031-SOS') },
+				{ latlng: new kakao.maps.LatLng(37.6001583333333, 127.142508333333), content: makeDiv('CCTV-SOS(11)', 'CCTV-A-수-032-SOS') },
+				{ latlng: new kakao.maps.LatLng(37.6000777777778, 127.143861111111), content: makeDiv('CCTV-SOS(11)', 'CCTV-A-수-033-SOS') },
+				{ latlng: new kakao.maps.LatLng(37.5992083333333, 127.144041666667), content: makeDiv('CCTV-SOS(11)', 'CCTV-A-수-034-SOS') },
+				{ latlng: new kakao.maps.LatLng(37.5979166666667, 127.143386111111), content: makeDiv('CCTV-벨(6)', 'CCTV-A-수-022') },
+				{ latlng: new kakao.maps.LatLng(37.5982944444444, 127.143600000000), content: makeDiv('CCTV-벨(6)', 'CCTV-A-수-039') },
+				{ latlng: new kakao.maps.LatLng(37.5995416666667, 127.146958333333), content: makeDiv('CCTV-벨(6)', 'CCTV-A-수-043') },
+				{ latlng: new kakao.maps.LatLng(37.5997194444444, 127.142486111111), content: makeDiv('CCTV-벨(6)', 'CCTV-A-수-045') },
+				{ latlng: new kakao.maps.LatLng(37.5996750000000, 127.145202777778), content: makeDiv('CCTV-벨(6)', 'CCTV-A-수-047') },
+				{ latlng: new kakao.maps.LatLng(37.6009750000000, 127.144919444444), content: makeDiv('CCTV-벨(6)', 'CCTV-A-수-049') },
+				{ latlng: new kakao.maps.LatLng(37.6002416666667, 127.144988888889), content: makeDiv('CCTV-멀티(9)', 'CCTV-A-수-005-멀티1') },
+				{ latlng: new kakao.maps.LatLng(37.6003500000000, 127.144700000000), content: makeDiv('CCTV-멀티(9)', 'CCTV-A-수-005-멀티2') },
+				{ latlng: new kakao.maps.LatLng(37.5991527777778, 127.144722222222), content: makeDiv('CCTV-멀티(9)', 'CCTV-A-수-010-멀티') },
+				{ latlng: new kakao.maps.LatLng(37.6006888888889, 127.143463888889), content: makeDiv('CCTV-멀티(9)', 'CCTV-A-수-013-멀티') },
+				{ latlng: new kakao.maps.LatLng(37.5999611111111, 127.142777777778), content: makeDiv('CCTV-멀티(9)', 'CCTV-A-수-032-멀티') },
+				{ latlng: new kakao.maps.LatLng(37.6000555555556, 127.143302777778), content: makeDiv('CCTV-멀티(9)', 'CCTV-A-수-033-멀티') },
+				{ latlng: new kakao.maps.LatLng(37.5987777777778, 127.143966666667), content: makeDiv('CCTV-멀티(9)', 'CCTV-A-수-034-멀티1') },
+				{ latlng: new kakao.maps.LatLng(37.5994611111111, 127.143927777778), content: makeDiv('CCTV-멀티(9)', 'CCTV-A-수-034-멀티2') },
+				{ latlng: new kakao.maps.LatLng(37.5994750000000, 127.143791666667), content: makeDiv('CCTV-멀티(9)', 'CCTV-A-수-034-멀티3') },
+			], [ // 반사경
+				{ latlng: new kakao.maps.LatLng(37.5997416666667, 127.147202777778), content: makeDiv('반사경(13)', '반사경x01') },
+				{ latlng: new kakao.maps.LatLng(37.5992500000000, 127.145561111111), content: makeDiv('반사경(13)', '반사경x02') },
+				{ latlng: new kakao.maps.LatLng(37.5992361111111, 127.145400000000), content: makeDiv('반사경(13)', '반사경x03') },
+				{ latlng: new kakao.maps.LatLng(37.5998166666667, 127.145675000000), content: makeDiv('반사경(13)', '반사경x04') },
+				{ latlng: new kakao.maps.LatLng(37.5999722222222, 127.145638888889), content: makeDiv('반사경(13)', '반사경x05') },
+				{ latlng: new kakao.maps.LatLng(37.6010194444444, 127.145697222222), content: makeDiv('반사경(13)', '반사경x06') },
+				{ latlng: new kakao.maps.LatLng(37.6010666666667, 127.144675000000), content: makeDiv('반사경(13)', '반사경x07') },
+				{ latlng: new kakao.maps.LatLng(37.6013000000000, 127.144325000000), content: makeDiv('반사경(13)', '반사경x08') },
+				{ latlng: new kakao.maps.LatLng(37.6014277777778, 127.142494444444), content: makeDiv('반사경(13)', '반사경x09') },
+				{ latlng: new kakao.maps.LatLng(37.6015500000000, 127.142594444444), content: makeDiv('반사경(13)', '반사경x10') },
+				{ latlng: new kakao.maps.LatLng(37.6010500000000, 127.143058333333), content: makeDiv('반사경(13)', '반사경x11') },
+				{ latlng: new kakao.maps.LatLng(37.5999222222222, 127.142722222222), content: makeDiv('반사경(13)', '반사경x12') },
+				{ latlng: new kakao.maps.LatLng(37.5997583333333, 127.146880555556), content: makeDiv('반사경(13)', '반사경x13') },
+			], [ // 신호등
+				{ latlng: new kakao.maps.LatLng(37.5979055555556, 127.143438888889), content: makeDiv('신호등(8)', '신호등x01') },
+				{ latlng: new kakao.maps.LatLng(37.5979638888889, 127.143302777778), content: makeDiv('신호등(8)', '신호등x02') },
+				{ latlng: new kakao.maps.LatLng(37.5986250000000, 127.142922222222), content: makeDiv('신호등(8)', '신호등x03') },
+				{ latlng: new kakao.maps.LatLng(37.6000888888889, 127.141852777778), content: makeDiv('신호등(8)', '신호등x04') },
+				{ latlng: new kakao.maps.LatLng(37.6010333333333, 127.141677777778), content: makeDiv('신호등(8)', '신호등x05') },
+				{ latlng: new kakao.maps.LatLng(37.6008916666667, 127.141572222222), content: makeDiv('신호등(8)', '신호등x06') },
+				{ latlng: new kakao.maps.LatLng(37.5998611111111, 127.142119444444), content: makeDiv('신호등(8)', '신호등x07') },
+				{ latlng: new kakao.maps.LatLng(37.5993000000000, 127.146652777778), content: makeDiv('신호등(8)', '신호등x08') },
+			], [ // 쓰레기무단투기
+				{ latlng: new kakao.maps.LatLng(37.6008250000000, 127.144919444444), content: makeDiv('CCTV-쓰레기(2)', '쓰레기무단투기x01') },
+				{ latlng: new kakao.maps.LatLng(37.6013444444444, 127.144158333333), content: makeDiv('CCTV-쓰레기(2)', '쓰레기무단투기x02') },
+			], [ // 의류수거함
+				{ latlng: new kakao.maps.LatLng(37.5991833333333, 127.144888888889), content: makeDiv('의류수거함(12)', '의류수거함A008') },
+				{ latlng: new kakao.maps.LatLng(37.5996694444444, 127.145125000000), content: makeDiv('의류수거함(12)', '의류수거함A070') },
+				{ latlng: new kakao.maps.LatLng(37.6005083333333, 127.145713888889), content: makeDiv('의류수거함(12)', '의류수거함A072') },
+				{ latlng: new kakao.maps.LatLng(37.5998916666667, 127.142752777778), content: makeDiv('의류수거함(12)', '의류수거함A079') },
+				{ latlng: new kakao.maps.LatLng(37.6008250000000, 127.143066666667), content: makeDiv('의류수거함(12)', '의류수거함A082') },
+				{ latlng: new kakao.maps.LatLng(37.5990722222222, 127.146072222222), content: makeDiv('의류수거함(12)', '의류수거함A083') },
+				{ latlng: new kakao.maps.LatLng(37.6004138888889, 127.146111111111), content: makeDiv('의류수거함(12)', '의류수거함A084') },
+				{ latlng: new kakao.maps.LatLng(37.6009611111111, 127.144761111111), content: makeDiv('의류수거함(12)', '의류수거함A112') },
+				{ latlng: new kakao.maps.LatLng(37.6004722222222, 127.145408333333), content: makeDiv('의류수거함(12)', '의류수거함B01-1') },
+				{ latlng: new kakao.maps.LatLng(37.6001888888889, 127.143494444444), content: makeDiv('의류수거함(12)', '의류수거함B01-2') },
+				{ latlng: new kakao.maps.LatLng(37.6008111111111, 127.145133333333), content: makeDiv('의류수거함(12)', '의류수거함B069') },
+				{ latlng: new kakao.maps.LatLng(37.6013666666667, 127.143861111111), content: makeDiv('의류수거함(12)', '의류수거함B095') },
+			], [ // 교통표지판
+				{ latlng: new kakao.maps.LatLng(37.6017194444444, 127.142800000000), content: makeDiv('표지판(3)', '교통표지판x01') },
+				{ latlng: new kakao.maps.LatLng(37.5983166666667, 127.143044444444), content: makeDiv('표지판(3)', '교통표지판x02') },
+				{ latlng: new kakao.maps.LatLng(37.6007694444444, 127.141633333333), content: makeDiv('표지판(3)', '교통표지판x03') },
+			]
+		];
+
+		var markerImageSrc = './map-icon3.png';  // 마커이미지의 주소입니다. 스프라이트 이미지 입니다
+		// 가로등,보안등,공원등,주차등,아파트등,고보조명,전신주,통신주,CCTV,반사경,신호등,쓰레기무단투기,의류수거함,교통표지판 마커 객체를 가지고 있을 배열
+		var markers = [
+			[], [], [], [], [], [], [], [], [], [], [], [], [], []
+		];
+
+		createMarkers(0); // 가로등 마커를 생성하고 마커 배열에 추가
+		createMarkers(1); // 보안등 마커를 생성하고 마커 배열에 추가
+		createMarkers(2); // 공원등 마커를 생성하고 마커 배열에 추가
+		createMarkers(3); // 주차등 마커를 생성하고 마커 배열에 추가
+		createMarkers(4); // 아파트등 마커를 생성하고 마커 배열에 추가
+		createMarkers(5); // 고보조명 마커를 생성하고 마커 배열에 추가
+		createMarkers(6); // 전신주 마커를 생성하고 마커 배열에 추가
+		createMarkers(7); // 통신주 마커를 생성하고 마커 배열에 추가
+		createMarkers(8); // CCTV 마커를 생성하고 마커 배열에 추가
+		createMarkers(9); // 반사경 마커를 생성하고 마커 배열에 추가
+		createMarkers(10); // 신호등 마커를 생성하고 마커 배열에 추가
+		createMarkers(11); // 쓰레기무단투기 마커를 생성하고 마커 배열에 추가
+		createMarkers(12); // 의류수거함 마커를 생성하고 마커 배열에 추가
+		createMarkers(13); // 교통표지판 마커를 생성하고 마커 배열에 추가
+
+		changeMarker(0); // 지도에 가로등 마커가 보이도록 설정합니다    
+
+		// 마커이미지의 주소와, 크기, 옵션으로 마커 이미지를 생성하여 리턴하는 함수입니다
+		function createMarkerImage(src, size, options) {
+			var markerImage = new kakao.maps.MarkerImage(src, size, options);
+			return markerImage;
+		}
+
+		// 좌표와 마커이미지를 받아 마커를 생성하여 리턴하는 함수입니다
+		function createMarker(position, image) {
+			var marker = new kakao.maps.Marker({
+				position: position.latlng,
+				image: image,
+			});
+
+			return marker;
+		}
+
+		function createMarkers(idx) {
+
+			for (var i = 0; i < markerPositions[idx].length; i++) {
+
+				var imageSize = new kakao.maps.Size(20, 20),
+					imageOptions = {
+						spriteOrigin: new kakao.maps.Point(20 * idx, 0),
+						spriteSize: new kakao.maps.Size(280, 20)
+					};
+
+				// 마커이미지와 마커를 생성합니다
+				var markerImage = createMarkerImage(markerImageSrc, imageSize, imageOptions),
+					marker = createMarker(markerPositions[idx][i], markerImage);
+
+				// 마커에 표시할 인포윈도우를 생성합니다 
+				var infowindow = new kakao.maps.InfoWindow({
+					content: markerPositions[idx][i].content, // 인포윈도우에 표시할 내용
+					removable: true, // removeable 속성을 ture 로 설정하면 인포윈도우를 닫을 수 있는 x버튼이 표시됩니다
+				});
+
+				// 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
+				// 이벤트 리스너로는 클로저를 만들어 등록합니다 
+				// for문에서 클로저를 만들어 주지 않으면 마지막 마커에만 이벤트가 등록됩니다
+				// kakao.maps.event.addListener(marker, 'mouseover', makeOverListener(map, marker, infowindow));
+				// kakao.maps.event.addListener(marker, 'mouseout', makeOutListener(infowindow));
+				kakao.maps.event.addListener(marker, 'click', makeOverListener(map, marker, infowindow));
+
+				// 주소 표출용
+				// searchDetailAddrFromCoords(markerPositions[idx][i]);
+
+				// 생성된 마커를 마커 배열에 추가합니다
+				markers[idx].push(marker);
+			}
+		}
+
+		// 마커들의 지도 표시 여부를 설정하는 함수입니다
+		function setMarkers(idx, map) {
+			for (var i = 0; i < markers[idx].length; i++) {
+				markers[idx][i].setMap(map);
+			}
+		}
+
+		// 카테고리를 클릭했을 때 type에 따라 카테고리의 스타일과 지도에 표시되는 마커를 변경합니다
+		function changeMarker(idx) {
+			var markerMenus = [
+				document.getElementById('markerMenu01'), // 가로등
+				document.getElementById('markerMenu02'), // 보안등
+				document.getElementById('markerMenu03'), // 공원등
+				document.getElementById('markerMenu04'), // 주차등
+				document.getElementById('markerMenu05'), // 아파트등
+				document.getElementById('markerMenu06'), // 고보조명
+				document.getElementById('markerMenu07'), // 전신주
+				document.getElementById('markerMenu08'), // 통신주
+				document.getElementById('markerMenu09'), // CCTV
+				document.getElementById('markerMenu10'), // 반사경
+				document.getElementById('markerMenu11'), // 신호등
+				document.getElementById('markerMenu12'), // 쓰레기무단투기
+				document.getElementById('markerMenu13'), // 의류수거함
+				document.getElementById('markerMenu14'), // 교통표지판
+
+			];
+
+			for (let i = 0; i < markerMenus.length; i++) {
+				const markerMenu = markerMenus[i];
+				if (i == idx) {
+					markerMenus[i].className = 'menu_selected';
+					setMarkers(i, map);
+				} else {
+					markerMenu.className = '';
+					setMarkers(i, null);
+				}
+			}
+		}
+
+		// 인포윈도우를 표시하는 클로저를 만드는 함수입니다 
+		function makeOverListener(map, marker, infowindow) {
+			return function () {
+				infowindow.open(map, marker);
+			};
+		}
+
+		// 인포윈도우를 닫는 클로저를 만드는 함수입니다 
+		function makeOutListener(infowindow) {
+			return function () {
+				infowindow.close();
+			};
+		}
+		
+		function searchDetailAddrFromCoords(pos) {
+			// 좌표로 법정동 상세 주소 정보를 요청합니다
+			geocoder.coord2Address(pos.latlng.getLng(), pos.latlng.getLat(), (result, status) => {
+
+				var detailAddr = !!result[0].road_address ? '도로명주소 : ' + result[0].road_address.address_name + ' / ' : '';
+				detailAddr += '지번 주소 : ' + result[0].address.address_name;
+
+				console.log(detailAddr, pos.content);
+				return;
+			});
+		}
+
+
+	</script>
+</body>
+
+</html>
