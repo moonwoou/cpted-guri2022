@@ -483,14 +483,14 @@ for (let ci = 0; ci < category.length; ci++) {
 	if (category[ci] == '신호등') continue;
 	if (category[ci] == '아파트등') continue;
 	if (category[ci] == '의류수거함') continue;
-	if (category[ci] == '전신주') continue;
+	// if (category[ci] == '전신주') continue;
 	if (category[ci] == '주차등') continue;
-	if (category[ci] == '통신주') continue;
+	// if (category[ci] == '통신주') continue;
 	if (category[ci] == '표지판') continue;
 	if (category[ci] == '쓰레기무단투기') continue;
-	// if (category[ci] == 'CCTV-SOS') continue;
-	// if (category[ci] == 'CCTV-벨') continue;
-	// if (category[ci] == 'CCTV-멀티') continue;
+	if (category[ci] == 'CCTV-SOS') continue;
+	if (category[ci] == 'CCTV-벨') continue;
+	if (category[ci] == 'CCTV-멀티') continue;
 
 	const item = items[category[ci]];
 
